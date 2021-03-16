@@ -1,8 +1,8 @@
 package com.changenode.plugin;
 
+import com.changenode.JavaFxApplication;
 import com.changenode.Log;
 import com.changenode.Plugin;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
@@ -54,7 +54,7 @@ public class StandardMenus implements Plugin {
         file.getItems().addAll(newFile, open);
 
         if (!isMac()) {
-            MenuItem quit = Configure("Quit", x -> Platform.exit(), KeyCode.Q);
+            MenuItem quit = Configure("Quit", x -> JavaFxApplication.quit(), KeyCode.Q);
             file.getItems().add(quit);
         } else {
             menuBar.setUseSystemMenuBar(true);

@@ -1,8 +1,8 @@
 package com.changenode.plugin;
 
-import com.changenode.BaseApplication;
 import com.changenode.Log;
 import com.changenode.Plugin;
+import com.changenode.SpringApplication;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
@@ -26,6 +26,6 @@ public class LogFile implements Plugin {
     }
 
     private void showDebugLog() {
-        getDesktop().browseFileDirectory(BaseApplication.outputFile);
+        getDesktop().browseFileDirectory(SpringApplication.outputFile);
     }
 }

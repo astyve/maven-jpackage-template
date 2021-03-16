@@ -2,6 +2,7 @@ package com.changenode;
 
 import com.changenode.plugin.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -11,41 +12,66 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
 
-import java.io.*;
+public class JavaFxApplication extends Application implements Log {
 
-import static javax.swing.filechooser.FileSystemView.getFileSystemView;
+    public static JavaFxApplication javaFxApplication;
 
-public class BaseApplication extends Application implements Log {
+    public ConfigurableApplicationContext applicationContext;
 
-    public static File outputFile;
+    static public void quit() {
+        if (javaFxApplication != null) {
+            javaFxApplication.applicationContext.close();
+            javaFxApplication = null;
+        }
+        Platform.exit();
+        System.exit(0);
+    }
+
+    @Override
+    public void stop() {
+        quit();
+    }
+
+    public void launchSpringBoot() {
+        String[] args = getParameters().getRaw().toArray(new String[0]);
+
+        try {
+            this.applicationContext = new SpringApplicationBuilder()
+                    .sources(SpringApplication.class)
+                    .run(args);
+        } catch (Exception e) {
+            log("Unable to start Spring Boot");
+            log(e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
     /**
      * This is the very simple "registry" for the various demonstration features of this application.
      */
     private final Plugin[] plugins = new Plugin[]{new StandardMenus(), new HelloWorld(), new FileDrop(),
-            new DesktopIntegration(), new LogFile(), new DarkMode()};
+            new DesktopIntegration(), new LogFile(), new DarkMode(), new SpringContextExplorer()};
 
     private TextArea textArea;
     private Label statusLabel;
 
-    public static void main(String[] args) {
-        /*
-         * This little bit of code causes this application to route the debugging output for this application to a
-         * log file in your "default" directory.
-         * */
-        try {
-            outputFile = File.createTempFile("debug", ".log", getFileSystemView().getDefaultDirectory());
-            PrintStream output = new PrintStream(new BufferedOutputStream(new FileOutputStream(outputFile)), true);
-            System.setOut(output);
-            System.setErr(output);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        launch(args);
-    }
+    private StringBuilder logCache = new StringBuilder();
 
     public void log(String s) {
+        if (textArea == null) {
+            logCache.append(s);
+            return;
+        }
+
+        if (logCache.length() > 0) {
+            textArea.appendText(logCache.toString());
+            logCache = new StringBuilder();
+        }
+
         textArea.appendText(s);
         textArea.appendText(System.lineSeparator());
         statusLabel.setText(s);
@@ -53,6 +79,7 @@ public class BaseApplication extends Application implements Log {
 
     @Override
     public void start(Stage stage) {
+        javaFxApplication = this;
 
         BorderPane borderPane = new BorderPane();
 
@@ -96,5 +123,7 @@ public class BaseApplication extends Application implements Log {
         statusLabel.setText("Ready.");
 
         stage.show();
+
+        launchSpringBoot();
     }
 }

@@ -7,6 +7,8 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ToolBar;
 import javafx.stage.Stage;
+import org.springframework.stereotype.Service;
+
 
 public class HelloWorld implements Plugin {
 
